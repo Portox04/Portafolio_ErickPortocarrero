@@ -4,6 +4,14 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Sensitive Files ###
+src/main/resources/firebase/serviceAccountKey.json
+
+### macOS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
 ### STS ###
 .apt_generated
 .classpath
@@ -25,6 +33,8 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
+nb-configuration.xml
+nbactions.xml
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
