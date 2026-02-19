@@ -25,6 +25,9 @@ public class ProductoService {
     @Autowired
     private ProductoRepository productoRepository;
 
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
+
     @Transactional(readOnly = true)
     public List<Producto> getProductos(boolean activo) {
         if (activo) {
@@ -38,34 +41,42 @@ public class ProductoService {
         return productoRepository.findById(idProducto);
     }
 
-    @Autowired
-    private FirebaseStorageService firebaseStorageService;
-
     @Transactional
-    public void save(Producto producto, MultipartFile imageFile) {
+    public void save(Producto producto, MultipartFile imagenFile) {
+
         producto = productoRepository.save(producto);
-        if (!imageFile.isEmpty()) {
+
+        if (imagenFile != null && !imagenFile.isEmpty()) {
             try {
                 String rutaImagen = firebaseStorageService.uploadImage(
-                        imageFile, "producto",
-                        producto.getIdProducto());
+                        imagenFile,
+                        "producto",
+                        producto.getIdProducto()
+                );
                 producto.setRutaImagen(rutaImagen);
                 productoRepository.save(producto);
             } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
     @Transactional
     public void delete(Integer idProducto) {
+
         if (!productoRepository.existsById(idProducto)) {
-            throw new IllegalArgumentException("La producto con ID " + idProducto + " no existe.");
+            throw new IllegalArgumentException(
+                    "El producto con ID " + idProducto + " no existe."
+            );
         }
+
         try {
             productoRepository.deleteById(idProducto);
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("No se puede eliminar la producto. Tiene datos asociados.", e);
+            throw new IllegalStateException(
+                    "No se puede eliminar el producto. Tiene datos asociados.",
+                    e
+            );
         }
     }
-
 }

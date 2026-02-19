@@ -9,10 +9,11 @@ package Tienda_ErickP.controller;
  * @author porto
  */
 import Tienda_ErickP.domain.Producto;
+import Tienda_ErickP.service.CategoriaService;
 import Tienda_ErickP.service.ProductoService;
+import jakarta.validation.Valid;
 import java.util.Locale;
 import java.util.Optional;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -34,6 +35,9 @@ public class ProductoController {
     private ProductoService productoService;
 
     @Autowired
+    private CategoriaService categoriaService;
+
+    @Autowired
     private MessageSource messageSource;
 
     @GetMapping("/listado")
@@ -41,6 +45,12 @@ public class ProductoController {
         var productos = productoService.getProductos(false);
         model.addAttribute("productos", productos);
         model.addAttribute("totalProductos", productos.size());
+
+        var categorias = categoriaService.getCategorias(true);
+        model.addAttribute("categorias", categorias);
+
+        model.addAttribute("producto", new Producto());
+
         return "/producto/listado";
     }
 
@@ -48,15 +58,20 @@ public class ProductoController {
     public String guardar(@Valid Producto producto,
             Errors errors,
             @RequestParam MultipartFile imagenFile,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            Model model) {
 
         if (errors.hasErrors()) {
+            var categorias = categoriaService.getCategorias(true);
+            model.addAttribute("categorias", categorias);
             return "/producto/modifica";
         }
 
         productoService.save(producto, imagenFile);
+
         redirectAttributes.addFlashAttribute("todoOk",
                 messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
+
         return "redirect:/producto/listado";
     }
 
@@ -66,20 +81,23 @@ public class ProductoController {
 
         String titulo = "todoOk";
         String detalle = "mensaje.eliminado";
+
         try {
             productoService.delete(idProducto);
         } catch (IllegalArgumentException e) {
-            titulo = "error"; // Captura la excepción de argumento inválido para el mensaje de "no existe"
+            titulo = "error";
             detalle = "producto.error01";
         } catch (IllegalStateException e) {
-            titulo = "error"; // Captura la excepción de estado ilegal para el mensaje de "datos asociados"
+            titulo = "error";
             detalle = "producto.error02";
         } catch (Exception e) {
-            titulo = "error"; // Captura cualquier otra excepción inesperada
+            titulo = "error";
             detalle = "producto.error03";
         }
+
         redirectAttributes.addFlashAttribute(titulo,
                 messageSource.getMessage(detalle, null, Locale.getDefault()));
+
         return "redirect:/producto/listado";
     }
 
@@ -89,12 +107,18 @@ public class ProductoController {
             RedirectAttributes redirectAttributes) {
 
         Optional<Producto> productoOpt = productoService.getProducto(idProducto);
+
         if (productoOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error",
                     messageSource.getMessage("producto.error01", null, Locale.getDefault()));
             return "redirect:/producto/listado";
         }
+
         model.addAttribute("producto", productoOpt.get());
+
+        var categorias = categoriaService.getCategorias(true);
+        model.addAttribute("categorias", categorias);
+
         return "/producto/modifica";
     }
 }
