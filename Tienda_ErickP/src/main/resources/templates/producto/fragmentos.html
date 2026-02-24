@@ -44,7 +44,7 @@
                                 <!-- ✅ Select de categorías (usa idCategoria) -->
                                 <div class="mb-3">
                                     <label>[[#{producto.categoria}]]</label>
-                                    <select class="form-select" th:field="*{idCategoria}" required>
+                                    <select class="form-select" th:field="*{categoria.idCategoria}" required>
                                         <option value="" disabled selected>-- Seleccione --</option>
                                         <option th:each="c : ${categorias}" th:value="${c.idCategoria}">
                                             [[${c.descripcion}]]
@@ -130,7 +130,7 @@
 
                                     <tbody>
                                         <tr th:each="p : ${productos}">
-                                            <td>[[${p.idProducto}]]</td>
+                                            <td>[[${p.categoria.descripcion}]]</td>
                                             <td>[[${p.descripcion}]]</td>
                                             <td class="text-end">
                                                 ₡[[${#numbers.formatDecimal(p.precio, 1, 'COMMA', 2, 'POINT')}]]
@@ -142,7 +142,7 @@
                                             <td><img th:src="@{${p.rutaImagen}}" alt="noData" height="75"/></td>
 
                                             <!-- ✅ Como no hay p.categoria, mostramos idCategoria -->
-                                            <td>[[${p.idCategoria}]]</td>
+                                            <td>[[${p.categoria.descripcion}]]</td>
 
                                             <td th:text="${p.activo} ? 'Activa':'Inactiva'"></td>
 
@@ -223,7 +223,7 @@
 
                                 <div class="mb-3">
                                     <label>[[#{producto.categoria}]]</label>
-                                    <select class="form-select" th:field="*{idCategoria}" required>
+                                    <select class="form-select" th:field="*{categoria.idCategoria}" required>
                                         <option th:each="c : ${categorias}" th:value="${c.idCategoria}">
                                             [[${c.descripcion}]]
                                         </option>

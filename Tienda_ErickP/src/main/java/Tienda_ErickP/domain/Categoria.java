@@ -7,6 +7,7 @@ package Tienda_ErickP.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -36,4 +37,6 @@ public class Categoria implements Serializable {
 
     private boolean activo;
 
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
+    private List<Producto> productos;
 }
