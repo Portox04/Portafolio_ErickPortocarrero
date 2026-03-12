@@ -11,6 +11,7 @@ package Tienda_ErickP.service;
 import Tienda_ErickP.domain.Producto;
 import Tienda_ErickP.repository.ProductoRepository;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,6 @@ public class ProductoService {
     public Optional<Producto> getProducto(Integer idProducto) {
         return productoRepository.findById(idProducto);
     }
-
 
     @Transactional
     public void save(Producto producto, MultipartFile imagenFile) {
@@ -80,4 +80,20 @@ public class ProductoService {
             );
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<Producto> consultaDerivada(BigDecimal precioInf, BigDecimal precioSup) {
+        return productoRepository.findByPrecioBetweenOrderByPrecioAsc(precioInf, precioSup);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Producto> consultaJPQL(BigDecimal precioInf, BigDecimal precioSup) {
+        return productoRepository.consultaJPQL(precioInf, precioSup);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Producto> consultaSQL(BigDecimal precioInf, BigDecimal precioSup) {
+        return productoRepository.consultaSQL(precioInf, precioSup);
+    }
+
 }
