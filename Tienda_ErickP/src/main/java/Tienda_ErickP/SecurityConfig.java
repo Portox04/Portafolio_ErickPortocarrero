@@ -4,8 +4,14 @@
  */
 package Tienda_ErickP;
 
+import Tienda_ErickP.domain.Ruta;
+import Tienda_ErickP.service.RutaService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,16 +38,25 @@ public class SecurityConfig {
     public static final String[] ADMIN_URLS = {
         "/producto/**", "/categoria/**", "/usuario/**"
     };
+    @Autowired
+    private RutaService rutaService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(request -> request
-                .requestMatchers(PUBLIC_URLS).permitAll()
-                .requestMatchers(USUARIO_URLS).hasRole("USUARIO")
-                .requestMatchers(ADMIN_OR_VENDEDOR_URLS).hasAnyRole("ADMIN", "VENDEDOR")
-                .requestMatchers(ADMIN_URLS).hasRole("ADMIN")
-                .anyRequest().authenticated()
-        ).formLogin(form -> form // Configuración de formulario de login
+        var rutas = rutaService.getRutas();
+
+        http.authorizeHttpRequests(requests -> {
+            for (Ruta ruta : rutas) {
+                if (ruta.isRequiereRol()) {
+                    requests.requestMatchers(ruta.getRuta()).hasRole(ruta.getRol().getRol());
+                } else {
+                    requests.requestMatchers(ruta.getRuta()).permitAll();
+                }
+            }
+            requests.anyRequest().authenticated();
+        });
+
+        http.formLogin(form -> form // Configuración de formulario de login
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
                 .defaultSuccessUrl("/", true)
@@ -59,6 +74,7 @@ public class SecurityConfig {
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
         );
+
         return http.build();
     }
 
@@ -67,7 +83,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    //Este método será reemplazado la siguiente semana
+    /*Este método será reemplazado la siguiente semana
     @Bean
     public UserDetailsService users(PasswordEncoder passwordEncoder) {
         UserDetails juan = User.builder()
@@ -87,5 +103,11 @@ public class SecurityConfig {
                 .build();
         return new InMemoryUserDetailsManager(juan, rebeca, pedro);
     }
-
+     */
+    @Autowired
+    public void configurerGlobal(AuthenticationManagerBuilder build,
+            @Lazy PasswordEncoder passwordEncoder,
+            @Lazy UserDetailsService userDetailsService) throws Exception {
+        build.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+    }
 }

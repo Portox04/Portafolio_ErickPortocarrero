@@ -67,7 +67,7 @@
             <div th:replace="~{consultas/fragmentos :: formConsulta('primary',#{consultas.derivadas},'/consultas/consultaDerivada')}"/>
             <div th:replace="~{consultas/fragmentos :: formConsulta('warning',#{consultas.jpql},'/consultas/consultaJPQL')}"/>
             <div th:replace="~{consultas/fragmentos :: formConsulta('success',#{consultas.sql},'/consultas/consultaSQL')}"/>
-            <div class='card'><p>Acá va su Práctica #2</p></div>
+            <div th:replace="~{consultas/fragmentos :: formConsultaDescripcion('dark',#{consultas.descripcion},'/consultas/consultaDescription')}"/>
         </section>
 
         <div th:fragment='formConsulta(colorForm, textoForm, urlForm)'>
@@ -93,6 +93,40 @@
                             <i class='fa-solid fa-magnifying-glass'></i> [[${textoForm}]]
                         </button>
                     </div>
+                </div>
+            </form>
+        </div>
+        <div th:fragment='formConsultaDescripcion(colorForm, textoForm, urlForm)'>
+            <form method="post" th:action='@{${urlForm}}' class='was-validated'>
+                <div class='card p-2'>
+
+                    <!-- Header -->
+                    <div class="card-header text-center text-white" th:classappend="${'bg-'+colorForm}">
+                        <h5>[[${textoForm}]]</h5>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body">
+                        <div class='mb-3'>
+                            <label>[[#{consultas.descripcion}]]</label>
+                            <input type="text" 
+                                   name='description' 
+                                   th:value='${description}'
+                                   class='form-control' 
+                                   placeholder="Ej: shampoo, corte, maquillaje..."
+                                   required/>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="card-footer text-center">
+                        <button type='submit' 
+                                class='btn text-white' 
+                                th:classappend="${'btn-'+colorForm}">
+                            <i class='fa-solid fa-magnifying-glass'></i> [[#{accion.buscar}]]
+                        </button>
+                    </div>
+
                 </div>
             </form>
         </div>
